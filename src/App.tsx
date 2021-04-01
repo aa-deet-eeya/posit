@@ -1,8 +1,15 @@
 import React from "react";
-import "./App.css";
+import { Header } from "./components/Header";
+import { ImageSection } from "./components/ImageSection";
+// import "./App.css";
 
 function App() {
-  return <div className="App"></div>;
+  return (
+    <div className="App">
+      <Header />
+      <ImageSection />
+    </div>
+  );
 }
 
 export default App;
