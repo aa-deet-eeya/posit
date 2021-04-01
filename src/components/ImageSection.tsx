@@ -29,8 +29,9 @@ const fetchConfig = {
 };
 
 export const ImageSection: React.FC = () => {
-  const keywords = ["Random", "Doggo", "Pupper", "Kitty"];
+  const keywords = ["Random", "Doggo", "Cat", "Kitty"];
   const [selected, setSelected] = useState<string>("Random");
+  const [firstLoad, setFirstLoad] = useState(true);
 
   const setTab = (tab: string) => {
     setSelected(tab);
@@ -51,28 +52,35 @@ export const ImageSection: React.FC = () => {
         const results: imgObj[] = data.results;
         imgDispatch({ type: "STACK_IMAGES", images: results });
         imgDispatch({ type: "FETCHING_IMAGES", fetching: false });
+        setFirstLoad(false);
       })
       .catch((err) => {
-        console.log(err);
+        console.log("error", err);
         imgDispatch({ type: "FETCHING_IMAGES", fetching: false });
+        setFirstLoad(false);
         return err;
       });
   }, [imgDispatch, pager.page]);
 
   useEffect(() => {
+    setFirstLoad(true);
     pagerDispatch({ type: "RESET_PAGE" });
     imgDispatch({ type: "FETCHING_IMAGES", fetching: true });
     const url = `https://api.unsplash.com/search/photos?per_page=12&page=${pager.page}&query=${selected}`;
     fetch(url, fetchConfig)
-      .then((data) => data.json())
+      .then((data) => {
+        return data.json();
+      })
       .then((data) => {
         const results: imgObj[] = data.results;
         imgDispatch({ type: "NEW_IMAGES", images: results });
         imgDispatch({ type: "FETCHING_IMAGES", fetching: false });
+        setFirstLoad(false);
       })
       .catch((err) => {
-        console.log(err);
+        console.log("error", err);
         imgDispatch({ type: "FETCHING_IMAGES", fetching: false });
+        setFirstLoad(false);
         return err;
       });
   }, [selected]);
@@ -116,22 +124,26 @@ export const ImageSection: React.FC = () => {
           ))}
         </div>
       </div>
-      <div className="flex flex-wrap w-full">
-        {imgData.images.map((img, index) => (
-          <>
+      {!firstLoad && (
+        <div className="flex flex-wrap w-full">
+          {imgData.images.map((img, index) => (
             <img
-              key={img.id}
+              key={index}
               className={`object-cover transform max-h-img ${imgStyle(
                 index + 1
               )} hover:z-10 transition duration-500 hover:scale-90`}
               src={img.urls.regular}
               alt=" "
             ></img>
-          </>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
       {imgData.fetching && <Loading />}
-      <div id="page-bottom-boundary" ref={bottomBoundaryRef}></div>
+      <div
+        className="container m-1"
+        id="page-bottom-boundary"
+        ref={bottomBoundaryRef}
+      ></div>
     </>
   );
 };
